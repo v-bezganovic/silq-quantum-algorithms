@@ -1,0 +1,127 @@
+length := 10 : !ℕ;
+
+// A function to generate a random bit string of given length
+def randomBitString(length: !ℕ) : !𝔹^length{
+  string := vector(length, 0:!𝔹);
+
+  for i in [0..length){
+    string[i] = randomizer();
+  }
+
+  return string;
+}
+
+
+// Randomizer based on Hadamard measurement method
+def randomizer() : !𝔹 {
+  q := 0 : 𝔹;
+  return measure(H(q));
+}
+
+
+// A function to encode a bit string into qubits
+def encodeBitString(a_state: !𝔹^length, a_bases: !𝔹^length) : 𝔹^length {
+  qub := vector(length, 0:𝔹);   // default qubit value is 0
+
+  for i in [0..length){
+    
+    if (a_state[i] == 1){       // set qubits to 1 if chosen state is 1
+      qub[i] := X(qub[i]); 
+    }
+    if (a_bases[i] == 1){       // use computational if chosen basis is diagonal (1)
+      qub[i] := H(qub[i]) 
+    }
+
+  }
+
+  return qub;
+}
+
+
+// A function to measure qubits
+def measureQubits(qubits:𝔹^length, b_bases: !𝔹^length) : !𝔹^length {
+
+  measured := vector(length, 0:!𝔹);
+  
+  for i in [0..length){
+
+    if b_bases[i]{
+      qubits[i] := H(qubits[i])
+    }
+  }
+
+  measured = measure(qubits);
+  return measured;
+} 
+
+
+// A function to generate the key by comparing bitstrings
+def generateKey(a_string: !𝔹^length, b_string: !𝔹^length,  meas_qubits: !𝔹^length) : !𝔹[]{
+  key_length := 0 : !ℕ;
+
+  // Check measuring bases and determine the key length
+  for i in [0..length){
+    if (b_string[i] == a_string[i]){
+        key_length = key_length + 1;
+    }
+  }
+
+  // Initialize key
+  k := vector(key_length, 0:!𝔹);
+
+  // Temporary index
+  index := 0 : !ℕ;
+
+  // Generate key
+  for i in [0..length){
+    if (b_string[i] == a_string[i]){
+        k[index] = meas_qubits[i];
+        index = index + 1;
+    }
+  }
+
+  return k;
+}
+
+
+
+// Define the BB84 protocol function
+def bb84() : !𝔹[] {
+
+  // Generate two random bit strings,
+  // 1. Alice's state
+  // 2. Alice's bases
+  a_state := randomBitString(length) : !𝔹^length;
+  a_bases := randomBitString(length) : !𝔹^length;
+
+  // PRINT VALUES (DEBUG)
+  // print Alice states
+  print(a_state);
+
+  // print Alice bases 
+  print(a_bases);
+  
+  // Prepare qubits
+  qubits := encodeBitString(a_state, a_bases) : 𝔹^length;
+
+  // Generate another random bitstring
+  b_bases := randomBitString(length) : !𝔹^length;
+
+  // PRINT VALUES (DEBUG)
+  // print Bob bases: 
+  print(b_bases);
+
+  // Measure qubits
+  measured_qubits := measureQubits(qubits, b_bases) : !𝔹^length;
+
+  // Generate the key by comparing bitstrings
+  key := generateKey(a_bases, b_bases, measured_qubits);
+
+  return (key);
+}
+
+
+def main() {
+  gen_key := bb84() : !𝔹[];
+  print(gen_key);
+}
