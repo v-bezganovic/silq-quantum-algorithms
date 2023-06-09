@@ -23,7 +23,7 @@ def randomInt() : uint[ar_length_bits]{
 
 
 def main(){
-    // Initialize an array of elements (for now hardcoded)
+    // Initialize an array of elements (hardcoded)
     array := [14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
     
     // Generate random index 0 <= y <= N-1
@@ -34,29 +34,21 @@ def main(){
 
     // Define oracle which outputs one only if less than minimum value
     f := λ(x : uint[5]) lifted : 𝔹 { 
-        //dump();
         return x <= solution;
     };
 
     // Iteration index and counter for Grover's loop
     t := 0 : !ℤ;
-    //count := 0 : !ℤ;
 
     // Grover's loop
     while (t <= (22.5*sqrt(arr_length) + 1.4*(log(arr_length)/log(2))^2)){
 
         temp_solution_index := grover(f) : !ℕ;
 
-        //print(array[temp_solution_index]);
-
         if (temp_solution_index < arr_length){
             
-            print(array[temp_solution_index]);                       
-
             if (array[temp_solution_index] < solution){
                 solution = array[temp_solution_index];
-                //count = count + 1;
-                //print(count);
             }
 
         }
