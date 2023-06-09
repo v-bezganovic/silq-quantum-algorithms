@@ -1,0 +1,14 @@
+// Source: https://github.com/eth-sri/silq.git
+
+import groverDiffusion;
+
+def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
+	nIterations:=floor(π/(4·asin(2^(-n/2))));
+	cand:=0:uint[n];
+    for k in [0..n){ cand[k]:=H(cand[k]); }
+	for k in [0..nIterations){
+		if f(cand){ phase(π); }
+		cand:=groverDiffusion(cand);
+	}
+	return measure(cand) as !ℕ;
+}
