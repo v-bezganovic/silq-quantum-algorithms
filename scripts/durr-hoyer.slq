@@ -1,0 +1,77 @@
+// Current algorithm's limit - array length of 30
+arr_length := 30 : !ℕ;
+ar_length_bits := 5 : !ℕ;
+
+// Source: https://github.com/eth-sri/silq.git
+def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	if cand!=0{ phase(π); }
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	return cand;
+}
+
+// Source: https://github.com/eth-sri/silq.git
+def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
+	nIterations:=floor(π/(4·asin(2^(-n/2))));
+	cand:=0:uint[n];
+    for k in [0..n){ cand[k]:=H(cand[k]); }
+	for k in [0..nIterations){
+		if f(cand){ phase(π); }
+		cand:=groverDiffusion(cand);
+	}
+	return measure(cand) as !ℕ;
+}
+
+// Generate random integer
+def randomInt() : uint[ar_length_bits]{
+    bin := vector(ar_length_bits,0:𝔹);
+
+    for i in [0..ar_length_bits-1){
+        bin[i] := H(bin[i]);
+    }
+
+    bin := measure(bin);
+    dec := bin as uint[ar_length_bits];          
+
+    return dec;
+    
+}
+
+
+
+def main(){
+    // Initialize an array of elements (hardcoded)
+    array := [14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
+    
+    // Generate random index 0 <= y <= N-1
+    index := randomInt() as uint[ar_length_bits];
+    index := measure(index);
+
+    solution := array[index] : !ℕ;
+
+    // Define oracle which outputs one only if less than minimum value
+    f := λ(x : uint[5]) lifted : 𝔹 { 
+        return x <= solution;
+    };
+
+    // Iteration index and counter for Grover's loop
+    t := 0 : !ℤ;
+
+    // Grover's loop
+    while (t <= (22.5*sqrt(arr_length) + 1.4*(log(arr_length)/log(2))^2)){
+
+        temp_solution_index := grover(f) : !ℕ;
+
+        if (temp_solution_index < arr_length){
+            
+            if (array[temp_solution_index] < solution){
+                solution = array[temp_solution_index];
+            }
+
+        }
+        
+        t = t+1;
+    }
+
+    print(solution);
+}
