@@ -1,0 +1,5 @@
+// Randomizer based on Hadamard measurement method
+def randomizer() : !𝔹 {
+  q := 0 : 𝔹;
+  return measure(H(q));
+}
