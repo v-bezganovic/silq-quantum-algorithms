@@ -3,3 +3,17 @@ def randomizer() : !𝔹 {
   q := 0 : 𝔹;
   return measure(H(q));
 }
+
+// Generate random integer (current limit - 30)
+def randomInt(ar_length_bits : !ℕ) : uint[ar_length_bits]{
+    bin := vector(ar_length_bits,0:𝔹);
+
+    for i in [0..ar_length_bits-1){
+        bin[i] := H(bin[i]);
+    }
+
+    bin := measure(bin);
+    dec := bin as uint[ar_length_bits];          
+
+    return dec;
+}
