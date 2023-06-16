@@ -1,0 +1,58 @@
+import random;
+
+// Current algorithm's limit - array length of 30
+arr_length := 30 : !ℕ;
+ar_length_bits := 5 : !ℕ;
+
+
+def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
+    // Generate random index function and take elements for subset randomly from given array
+    // Edit repository's structure to enable access to randomization methods
+    
+	subset := vector(k, 0:!ℕ);
+
+	for i in [0..k){
+		element_index := randomInt(ar_length_bits) as uint[ar_length_bits]; 
+		element_index_meas := measure(element_index);
+    	subset[i] = arr[element_index_meas];
+  	}
+
+    return subset;
+} 
+
+
+// Source: https://github.com/eth-sri/silq.git
+def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
+	nIterations:=floor(π/(4·asin(2^(-n/2))));
+	cand:=0:uint[n];
+    for k in [0..n){ cand[k]:=H(cand[k]); }
+	for k in [0..nIterations){
+		if f(cand){ phase(π); }
+		cand:=groverDiffusion(cand);
+	}
+	return measure(cand) as !ℕ;
+}
+
+
+// Source: https://github.com/eth-sri/silq.git
+def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	if cand!=0{ phase(π); }
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	return cand;
+}
+
+
+def main(){
+    // Initialize an array of elements (hardcoded)
+    array := [14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
+
+    // Set cardinality of a random subset
+    k := 5 : !ℕ;
+
+	// Generate random subset
+	subset := generate_Subset(k, array) as !ℕ[];
+
+	// Define test function for collision input
+	def func (x:!ℕ)mfree: !ℕ{ return x % 2 };
+}
