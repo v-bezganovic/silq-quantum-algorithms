@@ -6,9 +6,6 @@ ar_length_bits := 5 : !ℕ;
 
 
 def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
-    // Generate random index function and take elements for subset randomly from given array
-    // Edit repository's structure to enable access to randomization methods
-    
 	subset := vector(k, 0:!ℕ);
 
 	for i in [0..k){
@@ -19,6 +16,17 @@ def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 
     return subset;
 } 
+
+
+def generate_Output(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : !ℕ[]{
+	output_list := vector(k, 0:!ℕ);
+	
+	for i in [0..k){
+		output_list[i] = f(subset[i]);
+  	}
+	
+	return output_list;
+}
 
 
 // Source: https://github.com/eth-sri/silq.git
@@ -54,5 +62,9 @@ def main(){
 	subset := generate_Subset(k, array) as !ℕ[];
 
 	// Define test function for collision input
-	def func (x:!ℕ)mfree: !ℕ{ return x % 2 };
+	def func (x:!ℕ)mfree: !ℕ{ return x % 2 };			// current example - even/odd numbers
+
+	// Generate output list
+	outputs := generate_Output(k, subset, func);
+	print(outputs);
 }
