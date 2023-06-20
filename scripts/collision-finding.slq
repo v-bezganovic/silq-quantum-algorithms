@@ -17,12 +17,12 @@ def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 } 
 
 
-def generate_Lists(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : (!ℕ[] x !ℕ[]){
+def generate_Lists(k : !ℕ, subset : !ℕ[]) : (!ℕ[] x !ℕ[]){
 	output_list := vector(k, 0:!ℕ);
 	input_list := vector(k, 0:!ℕ);
 	
 	for i in [0..k){
-		output_list[i] = f(subset[i]);
+		output_list[i] = subset[i] % 7;
 		input_list[i] = subset[i];
   	}
 	
@@ -31,6 +31,7 @@ def generate_Lists(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : (!ℕ[] x !�
 
 
 def check_Doubles(k : !ℕ, output_list : !ℕ[], input_list : !ℕ[]) : (!ℕ x !ℕ){
+	grovers_item := 0 : !ℕ;
 	for i in [0..k){
 		for j in [i+1..k){
 			if output_list[j] == output_list[i] && input_list[j] != input_list[i]{
@@ -75,11 +76,8 @@ def main(){
 	// Generate random subset
 	subset := generate_Subset(k, array) as !ℕ[];
 
-	// Define test function for collision input
-	def func (x:!ℕ)mfree: !ℕ{ return x % 7 };
-
 	// Generate output list
-	(outputs, inputs) := generate_Lists(k, subset, func);
+	(outputs, inputs) := generate_Lists(k, subset);
 	print(outputs, inputs);										// DEBUG
 
 	// Collision elements
@@ -89,15 +87,37 @@ def main(){
 	if (check_Doubles(k, outputs, inputs) == (0, 0)){			// Collision not detected upon initial observation
 		print(1);												// DEBUG
 
+		// Assign element for Grover's search from verified inputs
+		comp_el := inputs[0];
+
+		// Define oracle for collision detection
+    	f := λ(x : uint[5]) lifted : 𝔹 { 
+    	    return x % 7 == comp_el % 7 && x != comp_el;
+    	};
+
+		// Iteration index and counter for Grover's loop
+    	t := 0 : !ℤ;
+
+		// Grover's loop
+		while (t <= (22.5*sqrt(arr_length) + 1.4*(log(arr_length)/log(2))^2)){
+			pending_solution_index := grover(f) : !ℕ;
+
+			print(pending_solution_index);
+
+			if pending_solution_index < 30 {
+				for i in [0..k){
+					if array[pending_solution_index] % 7 == inputs[i] % 7{
+						collision1 = array[pending_solution_index];
+						collision2 = inputs[i];
+					} 
+				}
+			}
+			t = t+1;
+		}
 
 	}
 
 	else {(collision1,collision2) = check_Doubles(k, outputs, inputs);}
-
-	// Define oracle for collision detection
-    //f := λ(x : uint[ar_length_bits]) lifted : 𝔹 { 
-    //    return x <= solution;
-    //};
 
 	print(collision1, collision2);
 }
