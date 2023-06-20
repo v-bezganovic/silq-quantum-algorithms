@@ -4,7 +4,6 @@ import random;
 arr_length := 30 : !ℕ;
 ar_length_bits := 5 : !ℕ;
 
-
 def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 	subset := vector(k, 0:!ℕ);
 
@@ -34,7 +33,7 @@ def generate_Lists(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : (!ℕ[] x !�
 def check_Doubles(k : !ℕ, output_list : !ℕ[], input_list : !ℕ[]) : (!ℕ x !ℕ){
 	for i in [0..k){
 		for j in [i+1..k){
-			if output_list[j] == output_list[i]{
+			if output_list[j] == output_list[i] && input_list[j] != input_list[i]{
 				return (input_list[i], input_list[j]);
 			} 
 		}
@@ -65,9 +64,10 @@ def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
 }
 
 
+
 def main(){
     // Initialize an array of elements (hardcoded)
-    array := [14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
+    array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
 
     // Set cardinality of a random subset
     k := 5 : !ℕ;
@@ -76,14 +76,28 @@ def main(){
 	subset := generate_Subset(k, array) as !ℕ[];
 
 	// Define test function for collision input
-	def func (x:!ℕ)mfree: !ℕ{ return x % 6 };
+	def func (x:!ℕ)mfree: !ℕ{ return x % 7 };
 
 	// Generate output list
 	(outputs, inputs) := generate_Lists(k, subset, func);
-	print(outputs);
+	print(outputs, inputs);										// DEBUG
+
+	// Collision elements
+	collision1 := 0 : !ℕ;
+	collision2 := 0 : !ℕ;
+
+	if (check_Doubles(k, outputs, inputs) == (0, 0)){			// Collision not detected upon initial observation
+		print(1);												// DEBUG
+
+
+	}
+
+	else {(collision1,collision2) = check_Doubles(k, outputs, inputs);}
 
 	// Define oracle for collision detection
     //f := λ(x : uint[ar_length_bits]) lifted : 𝔹 { 
     //    return x <= solution;
     //};
+
+	print(collision1, collision2);
 }
