@@ -18,14 +18,28 @@ def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 } 
 
 
-def generate_Output(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : !ℕ[]{
+def generate_Lists(k : !ℕ, subset : !ℕ[], f : !ℕ !→ !ℕ) : (!ℕ[] x !ℕ[]){
 	output_list := vector(k, 0:!ℕ);
+	input_list := vector(k, 0:!ℕ);
 	
 	for i in [0..k){
 		output_list[i] = f(subset[i]);
+		input_list[i] = subset[i];
   	}
 	
-	return output_list;
+	return (output_list, input_list);
+}
+
+
+def check_Doubles(k : !ℕ, output_list : !ℕ[], input_list : !ℕ[]) : (!ℕ x !ℕ){
+	for i in [0..k){
+		for j in [i+1..k){
+			if output_list[j] == output_list[i]{
+				return (input_list[i], input_list[j]);
+			} 
+		}
+	}
+	return (0, 0);
 }
 
 
@@ -62,9 +76,14 @@ def main(){
 	subset := generate_Subset(k, array) as !ℕ[];
 
 	// Define test function for collision input
-	def func (x:!ℕ)mfree: !ℕ{ return x % 2 };			// current example - even/odd numbers
+	def func (x:!ℕ)mfree: !ℕ{ return x % 6 };
 
 	// Generate output list
-	outputs := generate_Output(k, subset, func);
+	(outputs, inputs) := generate_Lists(k, subset, func);
 	print(outputs);
+
+	// Define oracle for collision detection
+    //f := λ(x : uint[ar_length_bits]) lifted : 𝔹 { 
+    //    return x <= solution;
+    //};
 }
