@@ -106,7 +106,7 @@ def main(){
 
 			if pending_solution_index < 30 {
 				for i in [0..k){
-					if array[pending_solution_index] % 7 == inputs[i] % 7{
+					if array[pending_solution_index] % 7 == inputs[i] % 7 && array[pending_solution_index] != inputs[i] {
 						collision1 = array[pending_solution_index];
 						collision2 = inputs[i];
 					} 
