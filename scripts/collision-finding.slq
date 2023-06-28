@@ -1,5 +1,8 @@
 import random;
 
+// Initialize an array of elements (hardcoded)
+    array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
+
 // Current algorithm's limit - array length of 30
 arr_length := 30 : !ℕ;
 ar_length_bits := 5 : !ℕ;
@@ -65,12 +68,8 @@ def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
 }
 
 
-
-def main(){
-    // Initialize an array of elements (hardcoded)
-    array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
-
-    // Set cardinality of a random subset
+def collisionDetection(set : !ℕ[]){
+	// Set cardinality of a random subset
     k := 5 : !ℕ;
 
 	// Generate random subset
@@ -114,5 +113,10 @@ def main(){
 
 	else {(collision1,collision2) = check_Doubles(k, outputs, inputs);}
 
-	print(collision1, collision2);
+	return (collision1, collision2);
+}
+
+
+def main(){
+	print(collisionDetection(array));
 }
