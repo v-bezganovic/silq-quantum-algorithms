@@ -95,11 +95,7 @@ def main(){
     	    return x % 7 == comp_el % 7 && x != comp_el;
     	};
 
-		// Iteration index and counter for Grover's loop
-    	t := 0 : !ℤ;
-
-		// Grover's loop
-		while (t <= (22.5*sqrt(arr_length) + 1.4*(log(arr_length)/log(2))^2)){
+		// Solution detection through Grover's search 
 			pending_solution_index := grover(f) : !ℕ;
 
 			print(pending_solution_index);
@@ -112,8 +108,7 @@ def main(){
 					} 
 				}
 			}
-			t = t+1;
-		}
+		
 
 	}
 
