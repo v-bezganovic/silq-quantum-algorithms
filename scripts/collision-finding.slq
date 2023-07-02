@@ -90,7 +90,7 @@ def collisionDetection(set : !ℕ[]){
 		comp_el := inputs[0];
 
 		// Define oracle for collision detection
-    	f := λ(x : uint[5]) lifted : 𝔹 { 
+    	f := λ(x : uint[ar_length_bits]) lifted : 𝔹 { 
     	    return x % 7 == comp_el % 7 && x != comp_el;
     	};
 
