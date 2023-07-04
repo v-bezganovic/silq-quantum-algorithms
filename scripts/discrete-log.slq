@@ -1,15 +1,15 @@
-// Quantum Fourier Transform, source: https://github.com/eth-sri/silq/blob/master/test/qft.slq
-def QFT[n:!ℕ](ψ: int[n])mfree: int[n]{
+def phaseQ[n:!ℕ](const φ: uint[n])mfree{
+	for i in [0..n){ if φ[i]{ phase(2·π·2^i/2^n); } }
+}
+
+def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
+	for k in [0..n){
+		j:=n sub 1 sub k;
+		ψ[j] := H(ψ[j]); // ψ'[j] = 1/√2(|0⟩+expi(2π·2^k·(ψ&2^j)/2^n)|1⟩)
+		if ψ[j]{ phaseQ(2^k·(ψ⊕2^j)); }// ψ''[j] = 1/√2(|0⟩+expi(2π·2^k·ψ/2^n)|1⟩)
+	}
 	for k in [0..n div 2){
 		(ψ[k],ψ[n-k-1]) := (ψ[n-k-1],ψ[k]);
-	}
-	for k in [0..n){
-		ψ[k] := H(ψ[k]);
-		for l in [k+1..n){
-			if ψ[k] && ψ[l]{
-				phase(2·π·2^(k-l-1));
-			}
-		}
 	}
 	return ψ;
 }
@@ -17,8 +17,11 @@ def QFT[n:!ℕ](ψ: int[n])mfree: int[n]{
 def discreteLog(a : !ℕ, b : !ℕ, r : !ℕ) : !ℕ{
 
     // Initialize state
-    qubits := vector(3, 0:𝔹);
+    qubits := vector(3, 0:uint[1]);
 
+    // Apply QFT on first two qubits
+	qubits[0] := QFT[1](qubits[0]);
+	qubits[1] := QFT[1](qubits[1]);
 
 
     return;
