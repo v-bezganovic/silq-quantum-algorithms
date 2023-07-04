@@ -14,6 +14,11 @@ def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
 	return ψ;
 }
 
+// Unitary transformation
+def unit(const x : uint[1], a : !ℕ, b : !ℕ, coef1 : !ℕ, coef2 : !ℕ) : 𝔹 { 
+    return x[2] != (b^coef1 * a^coef2);
+}
+
 def discreteLog(a : !ℕ, b : !ℕ, r : !ℕ) : !ℕ{
 
     // Initialize state
@@ -23,6 +28,10 @@ def discreteLog(a : !ℕ, b : !ℕ, r : !ℕ) : !ℕ{
 	qubits[0] := QFT[1](qubits[0]);
 	qubits[1] := QFT[1](qubits[1]);
 
+	coef1 := measure(qubits[0]) as !ℕ;
+	coef2 := measure(qubits[1]) as !ℕ;
+
+	qubits[2] := unit(qubits[2], a, b, coef1, coef2);
 
     return;
 }
