@@ -1,0 +1,14 @@
+// Determine binary length of N
+def bitLength(number : !ℕ) : !ℕ{
+    num := 0 : !ℕ;
+	index := 0 : !ℕ;
+
+	num = number;
+
+	while (num > 0){
+		num = num div 2;
+		index = index + 1;
+	}
+
+    return(index);
+}
