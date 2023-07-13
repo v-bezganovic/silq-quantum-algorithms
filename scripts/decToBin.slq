@@ -1,0 +1,13 @@
+def decToBin(n : !ℕ, num : !ℕ)mfree : uint[n]{
+    number := 0 : !ℕ;
+    bin := vector(n, 0:𝔹);
+
+    number = num;
+
+	for i in [0..n){
+        bin[i] = (number % 2) coerce 𝔹;
+		number = number div 2;
+	}
+
+    return bin as uint[n];
+} 
