@@ -1,4 +1,4 @@
-def decToBin(n : !ℕ, num : !ℕ)mfree : uint[n]{
+def decToBin(n : !ℕ, num : !ℕ)lifted : uint[n]{
     number := 0 : !ℕ;
     bin := vector(n, 0:𝔹);
 
