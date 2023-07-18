@@ -1,0 +1,64 @@
+import decToBin, bitLength;
+
+def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
+    // Initialize vector of qubits to operate on
+    qubits := vector(n, 0:𝔹);
+
+    // Generate binary representation of the given number m
+    len := bitLength(m);
+    bin := decToBin(len,m);
+    
+    // DEBUG
+    for i in [0..len){
+        print(bin[i]);
+    }
+
+    // Generate reverse binary representation
+    rev_bin := 0 : uint[len];
+    k := 0 : !ℕ;
+    for i in [0..len){
+        if bin[i]{k = k + 1;}
+        rev_bin[i] = X(bin[i]); 
+    }
+
+    // Detect locations of 1
+    locs := vector(k, 0:!ℕ);
+    temp := 0 : !ℕ;
+    for i in [0..len){
+        if rev_bin[i]{
+            locs[temp] = i;
+            temp = temp + 1; 
+        }
+    }
+
+    // Apply X to qubits under loc_1...loc_k
+    for i in [1..k){
+        qubits[locs[i]] = X(qubits[locs[i]]);
+    }
+
+    // Apply Hadamard to qubits before l_0
+    if locs[0] > 0 {
+        for i in [0..locs[0]){
+            qubits[i] := H(qubits[i]);
+        }
+    }
+
+    // Apply rotation Y
+    qubits[locs[1]] := rotY(-2*acos(sqrt((2^locs[0]) div m)), qubits[1]);
+
+    // Apply conditioned Hadamard
+    if !qubits[locs[1]]{
+        for i in [locs[0]..locs[1]-1){
+            qubits[i] := H(qubits[i]); 
+        }
+    }
+
+    // Fix bugs and perform steps 10 - 13
+
+    return qubits;
+} 
+
+def main(){
+    qubits := uniformSuperposition(8, 10); 
+    measure(qubits);
+}
