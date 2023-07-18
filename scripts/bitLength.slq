@@ -1,5 +1,5 @@
 // Determine binary length of N
-def bitLength(number : !ℕ) : !ℕ{
+def bitLength(number : !ℕ)lifted : !ℕ{
     num := 0 : !ℕ;
 	index := 0 : !ℕ;
 
