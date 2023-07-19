@@ -54,7 +54,20 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
         }
     }
 
-    // Fix bugs and perform steps 10 - 13
+    // Apply cyclic rotation and Hadamard operators
+    for i in [1..k-1){
+        qub1 := qubits[locs[i]];
+        if !qub1{
+            qubits[locs[i+1]] := rotY(-2*acos(sqrt((2^locs[i]) div (m - 2^(i-1)))), qubits[locs[i+1]]);
+        }
+        qub2 := qubits[locs[i+1]];
+        if !qub2{
+            for j in [locs[i]..locs[i+1]-1){
+                qubits[j] := H(qubits[j]);
+            }
+        }
+        // Reassign M_m here (and fix bugs)
+    }
 
     return qubits;
 } 
