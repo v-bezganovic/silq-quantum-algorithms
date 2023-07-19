@@ -46,8 +46,9 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     // Apply rotation Y
     qubits[locs[1]] := rotY(-2*acos(sqrt((2^locs[0]) div m)), qubits[1]);
 
+    q1 := qubits[locs[1]] : 𝔹;
     // Apply conditioned Hadamard
-    if !qubits[locs[1]]{
+    if !q1{
         for i in [locs[0]..locs[1]-1){
             qubits[i] := H(qubits[i]); 
         }
