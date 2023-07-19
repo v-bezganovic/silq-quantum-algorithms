@@ -14,7 +14,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     }
 
     // Generate reverse binary representation
-    rev_bin := 0 : uint[len];
+    rev_bin := 0 : !uint[len];
     k := 0 : !ℕ;
     for i in [0..len){
         if bin[i]{k = k + 1;}
@@ -24,6 +24,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     // Detect locations of 1
     locs := vector(k, 0:!ℕ);
     temp := 0 : !ℕ;
+
     for i in [0..len){
         if rev_bin[i]{
             locs[temp] = i;
@@ -57,7 +58,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     // Apply cyclic rotation and Hadamard operators
     for i in [1..k-1){
         qub1 := qubits[locs[i]];
-        if !qub1{
+        if !qub{
             qubits[locs[i+1]] := rotY(-2*acos(sqrt((2^locs[i]) div (m - 2^(i-1)))), qubits[locs[i+1]]);
         }
         qub2 := qubits[locs[i+1]];
