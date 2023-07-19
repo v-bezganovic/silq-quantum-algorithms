@@ -16,31 +16,33 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     // Generate reverse binary representation
     rev_bin := 0 : !uint[len];
     k := 0 : !ℕ;
-    for i in [0..len){
-        if bin[i]{k = k + 1;}
-        rev_bin[i] = X(bin[i]); 
+    for i_1 in [0..len){
+        if bin[i_1]{k = k + 1;}
+        rev_bin[i_1] = X(bin[i_1]); 
     }
 
     // Detect locations of 1
     locs := vector(k, 0:!ℕ);
-    temp := 0 : !ℕ;
+    cur_slot := 0 : !ℕ;
 
-    for i in [0..len){
-        if rev_bin[i]{
-            locs[temp] = i;
-            temp = temp + 1; 
+    dump();
+
+    for i_2 in [0..len){
+        if rev_bin[i_2]{
+            locs[cur_slot] = i_2;
+            cur_slot = cur_slot + 1; 
         }
     }
 
     // Apply X to qubits under loc_1...loc_k
-    for i in [1..k){
-        qubits[locs[i]] = X(qubits[locs[i]]);
+    for i_3 in [1..k){
+        qubits[locs[i_3]] = X(qubits[locs[i_3]]);
     }
 
     // Apply Hadamard to qubits before l_0
     if locs[0] > 0 {
-        for i in [0..locs[0]){
-            qubits[i] := H(qubits[i]);
+        for i_4 in [0..locs[0]){
+            qubits[i_4] := H(qubits[i_4]);
         }
     }
 
@@ -51,28 +53,30 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     q1 := dup(qubits[locs[1]]);
     // Apply conditioned Hadamard
     if !q1{
-        for i in [locs[0]..locs[1]-1){
-            qubits[i] := H(qubits[i]); 
+        for i_5 in [locs[0]..locs[1]-1){
+            qubits[i_5] := H(qubits[i_5]); 
         }
     }
     forget(q1 = qubits[locs[1]]);
 
     // Apply cyclic rotation and Hadamard operators
-    for i in [1..k-1){
-        qub1 := dup(qubits[locs[i]]);
+    for i_6 in [1..k-1){
+        qub1 := dup(qubits[locs[i_6]]);
         if !qub1{
-            qubits[locs[i+1]] := rotY(-2*acos(sqrt((2^locs[i]) div (m - M_m))), qubits[locs[i+1]]);
+            qubits[locs[i_6+1]] := rotY(-2*acos(sqrt((2^locs[i_6]) div (m - M_m))), qubits[locs[i_6+1]]);
         }
-        forget(qub1 = qubits[locs[i]]);
-        qub2 := dup(qubits[locs[i+1]]);
+        forget(qub1 = qubits[locs[i_6]]);
+        qub2 := dup(qubits[locs[i_6+1]]);
         if !qub2{
-            for j in [locs[i]..locs[i+1]-1){
-                qubits[j] := H(qubits[j]);
+            for j_1 in [locs[i_6]..locs[i_6+1]-1){
+                qubits[j_1] := H(qubits[j_1]);
             }
         }
-        forget(qub2 = qubits[locs[i+1]]);
-        M_m = M_m + 2^locs[i];
+        forget(qub2 = qubits[locs[i_6+1]]);
+        M_m = M_m + 2^locs[i_6];
     }
+
+    dump();
 
     return qubits;
 } 
