@@ -45,29 +45,33 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     }
 
     // Apply rotation Y
-    qubits[locs[1]] := rotY(-2*acos(sqrt((2^locs[0]) div m)), qubits[1]);
+    M_m := 2^locs[0];
+    qubits[locs[1]] := rotY(-2*acos(sqrt(M_m div m)), qubits[1]);
 
-    q1 := qubits[locs[1]] : 𝔹;
+    q1 := dup(qubits[locs[1]]);
     // Apply conditioned Hadamard
     if !q1{
         for i in [locs[0]..locs[1]-1){
             qubits[i] := H(qubits[i]); 
         }
     }
+    measure(q1);
 
     // Apply cyclic rotation and Hadamard operators
     for i in [1..k-1){
-        qub1 := qubits[locs[i]];
-        if !qub{
-            qubits[locs[i+1]] := rotY(-2*acos(sqrt((2^locs[i]) div (m - 2^(i-1)))), qubits[locs[i+1]]);
+        qub1 := dup(qubits[locs[i]]);
+        if !qub1{
+            qubits[locs[i+1]] := rotY(-2*acos(sqrt((2^locs[i]) div (m - M_m))), qubits[locs[i+1]]);
         }
-        qub2 := qubits[locs[i+1]];
+        measure(qub1);
+        qub2 := dup(qubits[locs[i+1]]);
         if !qub2{
             for j in [locs[i]..locs[i+1]-1){
                 qubits[j] := H(qubits[j]);
             }
         }
-        // Reassign M_m here (and fix bugs)
+        measure(qub2);
+        M_m = M_m + 2^locs[i];
     }
 
     return qubits;
