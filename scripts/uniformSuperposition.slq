@@ -10,7 +10,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     
     // DEBUG
     for i in [0..len){
-        print(bin[i]);
+        //print(bin[i]);
     }
 
     // Generate reverse binary representation
@@ -21,14 +21,29 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
         rev_bin[i_1] = X(bin[i_1]); 
     }
 
+    // Flip the resulting representation
+    l := len div 2;
+    for bit in [0..l){
+        if rev_bin[bit] != rev_bin[len-bit-1]{
+            rev_bin[bit] = X(rev_bin[bit]);
+            rev_bin[len-bit-1] = X(rev_bin[len-bit-1]);
+        }
+    }
+
+    // DEBUG
+    for i in [0..len){
+        print(rev_bin[i]);
+    }
+
     // Detect locations of 1
     locs := vector(k, 0:!ℕ);
     cur_slot := 0 : !ℕ;
 
-    dump();
+    //dump();
 
     for i_2 in [0..len){
-        if rev_bin[i_2]{
+        if rev_bin[i_2]{    // out of bounds
+            dump();
             locs[cur_slot] = i_2;
             cur_slot = cur_slot + 1; 
         }
