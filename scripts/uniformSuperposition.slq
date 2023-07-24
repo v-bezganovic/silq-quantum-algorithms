@@ -22,12 +22,8 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     }
 
     // Flip the resulting representation
-    l := len div 2;
-    for bit in [0..l){
-        if rev_bin[bit] != rev_bin[len-bit-1]{
-            rev_bin[bit] = X(rev_bin[bit]);
-            rev_bin[len-bit-1] = X(rev_bin[len-bit-1]);
-        }
+    for bit in [0..len div 2){
+        (rev_bin[bit],rev_bin[len-bit-1]) = (rev_bin[len-bit-1],rev_bin[bit]);
     }
 
     // DEBUG
