@@ -8,47 +8,47 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     len := bitLength(m);
     bin := decToBin(len,m);
     
-    // DEBUG
-    //for i in [0..len){
-        //print(bin[i]);
-    //}
-
-    // Generate reverse binary representation
-    rev_bin := 0 : !uint[len];
+    // Detect locations of 1's
     k := 0 : !ℕ;
     for i_1 in [0..len){
-        rev_bin[i_1] = X(bin[i_1]); 
-        if rev_bin[i_1]{k = k + 1;}
+        if bin[i_1]{k = k + 1;}
     }
 
     // Flip the resulting representation
-    for bit in [0..len div 2){
-        (rev_bin[bit],rev_bin[len-bit-1]) = (rev_bin[len-bit-1],rev_bin[bit]);
-    }
-
+    //for bit in [0..len div 2){
+    //    (bin[bit],bin[len-bit-1]) = (bin[len-bit-1],bin[bit]);
+    //}
+    
     // DEBUG
     //for i in [0..len){
-    //    print(rev_bin[i]);
+    //    print(bin[i]);
     //}
 
     // Detect locations of 1
-    locs := vector(k, 0:!ℕ);
-    cur_slot := 0 : !ℕ;
-    for i_2 in [0..len){
-        if rev_bin[i_2]{
-            locs[cur_slot] = i_2;
-            cur_slot = cur_slot + 1; 
+    locs := vector(k, 0:!ℤ);
+    cur_slot := len-1 : !ℤ;
+    i_2 := 0 : !ℕ;
+    while (cur_slot > 0){
+        if bin[cur_slot]{
+            locs[i_2] = cur_slot;
+            i_2 = i_2 + 1;
         }
+        cur_slot = cur_slot - 1;
     }
 
-    // Apply X to qubits under loc_1...loc_k
-    for i_3 in [1..k){
+    // DEBUG
+    for i in [0..k){
+        print(locs[i]);
+    }
+    
+    // Apply X to qubits under loc_1...loc_k-1
+    for i_3 in [0..k-1){
         qubits[locs[i_3]] = X(qubits[locs[i_3]]);
     }
 
     // Apply Hadamard to qubits before l_0
-    if locs[0] > 0 {
-        for i_4 in [0..locs[0]){
+    if locs[k-1] > 0 {
+        for i_4 in [locs[k-1]+1..n){
             qubits[i_4] := H(qubits[i_4]);
         }
     }
@@ -57,10 +57,10 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     M_m := 2^locs[0];
     qubits[locs[1]] := rotY(-2*acos(sqrt(M_m div m)), qubits[locs[1]]);
 
-    q1 := dup(qubits[locs[1]]);
     // Apply conditioned Hadamard
+    q1 := dup(qubits[locs[1]]);
     if !q1{
-        for i_5 in [locs[0]..locs[1]-1){
+        for i_5 in [locs[k-1]..n){
             qubits[i_5] := H(qubits[i_5]); 
         }
     }
@@ -87,6 +87,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
 } 
 
 def main(){
-    qubits := uniformSuperposition(8, 10); 
+    qubits := uniformSuperposition(13, 5); 
+    dump();
     measure(qubits);
 }
