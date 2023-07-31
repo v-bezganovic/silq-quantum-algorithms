@@ -60,7 +60,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     // Apply conditioned Hadamard
     q1 := dup(qubits[locs[k-2]]);
     if !q1{
-        for i_5 in [locs[k-1]..n){
+        for i_5 in [locs[k-1]..locs[k-2]){
             qubits[i_5] := H(qubits[i_5]); 
         }
     }
