@@ -1,6 +1,6 @@
 import decToBin, bitLength;
 
-def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
+def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     // Initialize vector of qubits to operate on
     qubits := vector(n, 0:𝔹);
 
@@ -54,17 +54,17 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
     }
 
     // Apply rotation Y
-    M_m := 2^locs[0];
-    qubits[locs[1]] := rotY(-2*acos(sqrt(M_m div m)), qubits[locs[1]]);
+    M_m := 2^locs[k-1];
+    qubits[locs[k-2]] := rotY(-2*acos(sqrt(M_m div m)), qubits[locs[k-2]]);
 
     // Apply conditioned Hadamard
-    q1 := dup(qubits[locs[1]]);
+    q1 := dup(qubits[locs[k-2]]);
     if !q1{
         for i_5 in [locs[k-1]..n){
             qubits[i_5] := H(qubits[i_5]); 
         }
     }
-    forget(q1 = qubits[locs[1]]);
+    forget(q1 = qubits[locs[k-2]]);
 
     // Apply cyclic rotation and Hadamard operators
     for i_6 in [1..k-1){
@@ -83,7 +83,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
         M_m = M_m + 2^locs[i_6];
     }
 
-    return qubits;
+    return qubits as uint[n];
 } 
 
 def main(){
