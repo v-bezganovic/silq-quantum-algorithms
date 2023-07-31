@@ -55,7 +55,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
 
     // Apply rotation Y
     M_m := 2^locs[k-1];
-    qubits[locs[k-2]] := rotY(-2*acos(sqrt(M_m div m)), qubits[locs[k-2]]);
+    qubits[locs[k-2]] := rotY(-2*acos(sqrt(M_m / m)), qubits[locs[k-2]]);
 
     // Apply conditioned Hadamard
     q1 := dup(qubits[locs[k-2]]);
@@ -70,7 +70,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     for i_6 in [1..k-1){
         qub1 := dup(qubits[locs[i_6]]);
         if !qub1{
-            qubits[locs[i_6+1]] := rotY(-2*acos(sqrt((2^locs[i_6]) div (m - M_m))), qubits[locs[i_6+1]]);
+            qubits[locs[i_6+1]] := rotY(-2*acos(sqrt((2^locs[i_6]) / (m - M_m))), qubits[locs[i_6+1]]);
         }
         forget(qub1 = qubits[locs[i_6]]);
         qub2 := dup(qubits[locs[i_6+1]]);
