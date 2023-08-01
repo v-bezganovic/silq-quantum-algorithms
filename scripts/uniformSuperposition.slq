@@ -5,28 +5,17 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     qubits := vector(n, 0:𝔹);
 
     // Generate binary representation of the given number m
-    len := bitLength(m);
-    bin := decToBin(len,m);
+    bin := decToBin(n,m);
     
     // Detect locations of 1's
     k := 0 : !ℕ;
-    for i_1 in [0..len){
+    for i_1 in [0..n){
         if bin[i_1]{k = k + 1;}
     }
 
-    // Flip the resulting representation
-    //for bit in [0..len div 2){
-    //    (bin[bit],bin[len-bit-1]) = (bin[len-bit-1],bin[bit]);
-    //}
-    
-    // DEBUG
-    //for i in [0..len){
-    //    print(bin[i]);
-    //}
-
     // Detect locations of 1
     locs := vector(k, 0:!ℤ);
-    cur_slot := len-1 : !ℤ;
+    cur_slot := n-1 : !ℤ;
     i_2 := 0 : !ℕ;
     while (cur_slot > 0){
         if bin[cur_slot]{
@@ -35,14 +24,9 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
         }
         cur_slot = cur_slot - 1;
     }
-
-    // DEBUG
-    for i in [0..k){
-        print(locs[i]);
-    }
     
-    // Apply X to qubits under loc_1...loc_k-1
-    for i_3 in [0..k-1){
+    // Apply X to qubits under loc_1...loc_k
+    for i_3 in [0..k){
         qubits[locs[i_3]] = X(qubits[locs[i_3]]);
     }
 
@@ -75,7 +59,7 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
         forget(qub1 = qubits[locs[i_6]]);
         qub2 := dup(qubits[locs[i_6+1]]);
         if !qub2{
-            for j_1 in [locs[i_6]..locs[i_6+1]-1){
+            for j_1 in [locs[i_6]..locs[i_6+1]){
                 qubits[j_1] := H(qubits[j_1]);
             }
         }
@@ -87,7 +71,12 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
 } 
 
 def main(){
-    qubits := uniformSuperposition(13, 5); 
+
+    // INPUT
+    m := 13;
+    n := bitLength(m); 
+
+    qubits := uniformSuperposition(m, n); 
     dump();
     measure(qubits);
 }
