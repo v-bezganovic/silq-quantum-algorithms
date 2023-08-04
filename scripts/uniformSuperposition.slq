@@ -1,6 +1,21 @@
 import decToBin, bitLength;
 
-def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
+def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
+
+    if m == 2^n{
+
+        // Proceed with standart Hadamard application
+        qubits_H := vector(n, 0:𝔹);
+
+        for i in [0..n){
+            qubits_H[i] := H(qubits_H[i]);
+        }
+
+        return qubits_H;
+    }
+
+    else {
+
     // Initialize vector of qubits to operate on
     qubits := vector(n, 0:𝔹);
 
@@ -26,13 +41,13 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     }
     
     // Apply X to qubits under loc_1...loc_k
-    for i_3 in [0..k){
+    for i_3 in [0..k-1){
         qubits[locs[i_3]] = X(qubits[locs[i_3]]);
     }
 
     // Apply Hadamard to qubits before l_0
     if locs[k-1] > 0 {
-        for i_4 in [locs[k-1]+1..n){
+        for i_4 in [0..locs[k-1]){
             qubits[i_4] := H(qubits[i_4]);
         }
     }
@@ -51,30 +66,34 @@ def uniformSuperposition (m : !ℕ, n : !ℕ) : uint[n]{
     forget(q1 = qubits[locs[k-2]]);
 
     // Apply cyclic rotation and Hadamard operators
-    for i_6 in [1..k-1){
+    for i_7 in [1..k-1){
+        i_6 := k-1-i_7; 
         qub1 := dup(qubits[locs[i_6]]);
         if !qub1{
-            qubits[locs[i_6+1]] := rotY(-2*acos(sqrt((2^locs[i_6]) / (m - M_m))), qubits[locs[i_6+1]]);
+            qubits[locs[i_6-1]] := rotY(-2*acos(sqrt((2^locs[i_6]) / (m - M_m))), qubits[locs[i_6-1]]);
         }
         forget(qub1 = qubits[locs[i_6]]);
-        qub2 := dup(qubits[locs[i_6+1]]);
+        qub2 := dup(qubits[locs[i_6-1]]);
         if !qub2{
-            for j_1 in [locs[i_6]..locs[i_6+1]){
+            for j_1 in [locs[i_6]..locs[i_6-1]){
                 qubits[j_1] := H(qubits[j_1]);
             }
         }
-        forget(qub2 = qubits[locs[i_6+1]]);
+        forget(qub2 = qubits[locs[i_6-1]]);
         M_m = M_m + 2^locs[i_6];
     }
 
-    return qubits as uint[n];
+    return qubits;
+    }
+
 } 
+
 
 def main(){
 
     // INPUT
-    m := 13;
-    n := bitLength(m); 
+    m := 4;
+    n := ceil(log(m)/log(2)) coerce !ℕ;
 
     qubits := uniformSuperposition(m, n); 
     dump();
