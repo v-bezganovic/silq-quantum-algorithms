@@ -1,41 +1,53 @@
-def phaseQ[n:!ℕ](const φ: uint[n])mfree{
-	for i in [0..n){ if φ[i]{ phase(2·π·2^i/2^n); } }
-}
+import bitLength, decToBin;
+import uniformSuperposition;
 
+// Source: https://github.com/eth-sri/silq/blob/master/test/qft.slq
 def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
-	for k in [0..n){
-		j:=n sub 1 sub k;
-		ψ[j] := H(ψ[j]); // ψ'[j] = 1/√2(|0⟩+expi(2π·2^k·(ψ&2^j)/2^n)|1⟩)
-		if ψ[j]{ phaseQ(2^k·(ψ⊕2^j)); }// ψ''[j] = 1/√2(|0⟩+expi(2π·2^k·ψ/2^n)|1⟩)
+	for k in [0..n div 2){						// Performing operations on the first half of qubits
+		(ψ[k],ψ[n-k-1]) := (ψ[n-k-1],ψ[k]);		// Swapping opposite qubits
 	}
-	for k in [0..n div 2){
-		(ψ[k],ψ[n-k-1]) := (ψ[n-k-1],ψ[k]);
+	for k in [0..n){
+		ψ[k] := H(ψ[k]);
+		for l in [k+1..n){
+			if ψ[k] && ψ[l]{
+				phase(2·π·2^(k-l-1));
+			}
+		}
 	}
 	return ψ;
 }
 
-// Unitary transformation
-def unit(const x : uint[1], a : !ℕ, b : !ℕ, coef1 : !ℕ, coef2 : !ℕ) : 𝔹 { 
-    return x[2] != (b^coef1 * a^coef2);
+// Unitary transformation |x⟩ |y⟩ |0⟩  >  |x⟩ |y⟩ |(b^x)(a^y)⟩
+def unit[n:!ℕ](const a : uint[n], const b : uint[n], g : !ℕ, x : !ℕ, n : !ℕ)lifted : uint[n] { 
+    return (decToBin(n,g)^a)*(decToBin(n,x)^(-b)) as uint[n];
 }
 
-def discreteLog(a : !ℕ, b : !ℕ, r : !ℕ) : !ℕ{
 
-    // Initialize state
-    qubits := vector(3, 0:uint[1]);
+def discreteLog(gen : !ℕ, mod : !ℕ, x : !ℕ): !ℕ{
+	n := bitLength(mod) : !ℕ;
 
-    // Apply QFT on first two qubits
-	qubits[0] := QFT[1](qubits[0]);
-	qubits[1] := QFT[1](qubits[1]);
+	// Uniform superposition prerequisite
+	r := ceil(log(n)/log(2)) coerce !ℕ;
 
-	coef1 := measure(qubits[0]) as !ℕ;
-	coef2 := measure(qubits[1]) as !ℕ;
+	// Initialize registers
+	reg_a := uniformSuperposition(n,r) coerce uint[n];
+	reg_b := uniformSuperposition(n,r) coerce uint[n];
+	reg_c := 0:int[n];
 
-	qubits[2] := unit(qubits[2], a, b, coef1, coef2);
+	dump();
 
-    return;
+	reg_c := unit(reg_a, reg_b, gen, x, n);
+	
+	reg_a := QFT(reg_a);
+	reg_b := QFT(reg_b);
+
+	// DEBUG (change later)
+	measure(reg_a);
+	measure(reg_b);
+
+	return(false);
 }
 
 def main(){
-    print(discreteLog());
+    print(discreteLog(13, 11, 9));
 }
