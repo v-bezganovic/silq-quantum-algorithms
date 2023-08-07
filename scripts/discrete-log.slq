@@ -1,4 +1,4 @@
-import bitLength, decToBin;
+import bitLength, decToBin, mod;
 import uniformSuperposition;
 
 // Source: https://github.com/eth-sri/silq/blob/master/test/qft.slq
@@ -17,14 +17,14 @@ def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
 	return ψ;
 }
 
-// Unitary transformation |x⟩ |y⟩ |0⟩  >  |x⟩ |y⟩ |(b^x)(a^y)⟩
-def unit[n:!ℕ](const a : uint[n], const b : uint[n], g : !ℕ, x : !ℕ, n : !ℕ)lifted : uint[n] { 
-    return (decToBin(n,g)^a)*(decToBin(n,x)^(-b)) as uint[n];
+// Unitary transformation |x⟩ |y⟩ |0⟩  >  |x⟩ |y⟩ |(b^x)(a^(-y)) mod p⟩
+def unit[n:!ℕ](a : uint[n], b : uint[n], g : !ℕ, x : !ℕ, p : !ℕ)lifted : uint[n] { 
+    return mod(((g coerce uint[n])^a)*((x coerce uint[n])^(-b)), p) as uint[n];
 }
 
 
-def discreteLog(gen : !ℕ, mod : !ℕ, x : !ℕ): !ℕ{
-	n := bitLength(mod) : !ℕ;
+def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
+	n := bitLength(p) : !ℕ;
 
 	// Uniform superposition prerequisite
 	r := ceil(log(n)/log(2)) coerce !ℕ;
@@ -32,11 +32,11 @@ def discreteLog(gen : !ℕ, mod : !ℕ, x : !ℕ): !ℕ{
 	// Initialize registers
 	reg_a := uniformSuperposition(n,r) coerce uint[n];
 	reg_b := uniformSuperposition(n,r) coerce uint[n];
-	reg_c := 0:int[n];
+	reg_c := 0:uint[n];
 
 	dump();
 
-	reg_c := unit(reg_a, reg_b, gen, x, n);
+	reg_c := unit(reg_a, reg_b, gen, x, p, n);
 	
 	reg_a := QFT(reg_a);
 	reg_b := QFT(reg_b);
