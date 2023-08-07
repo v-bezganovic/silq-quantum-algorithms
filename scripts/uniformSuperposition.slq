@@ -1,6 +1,6 @@
 import decToBin, bitLength;
 
-def uniformSuperposition (m : !ℕ, n : !ℕ) : 𝔹^n{
+def uniformSuperposition (m : !ℕ, n : !ℕ)mfree : 𝔹^n{
 
     if m == 2^n{
 
