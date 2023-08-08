@@ -52,7 +52,7 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 
 	dump();
 
-	reg_c := unit(reg_a, reg_b, gen, x, p);
+	reg_c = unit(reg_a, reg_b, gen, x, p);
 	
 	reg_a := QFT(reg_a);
 	reg_b := QFT(reg_b);
@@ -60,6 +60,7 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 	// DEBUG (change later)
 	measure(reg_a);
 	measure(reg_b);
+	measure(reg_c);
 
 	return(false);
 }
