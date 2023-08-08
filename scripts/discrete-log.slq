@@ -1,5 +1,6 @@
-import bitLength, decToBin, mod;
+import bitLength, decToBin;
 import uniformSuperposition;
+
 
 // Source: https://github.com/eth-sri/silq/blob/master/test/qft.slq
 def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
@@ -17,9 +18,24 @@ def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
 	return ψ;
 }
 
+
+// Compute a^b%N
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def powm[n:!ℕ,m:!ℕ](a:uint[n],b:uint[m],N:!ℕ)lifted: uint[n]{
+	(r,x):=(1:uint[n], a);
+	for i in 0..m{
+		if b[i]{
+			r=r·x%N;
+		}
+		x=x·x%N;
+	}
+	return r;
+}
+
+
 // Unitary transformation |x⟩ |y⟩ |0⟩  >  |x⟩ |y⟩ |(b^x)(a^(-y)) mod p⟩
 def unit[n:!ℕ](a : uint[n], b : uint[n], g : !ℕ, x : !ℕ, p : !ℕ)lifted : uint[n] { 
-    return mod(((g coerce uint[n])^a)*((x coerce uint[n])^(-b)), p) as uint[n];
+    return powm(g coerce uint[n],a,p)*powm(x coerce uint[n],b*(-1),p) as uint[n];
 }
 
 
@@ -36,7 +52,7 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 
 	dump();
 
-	reg_c := unit(reg_a, reg_b, gen, x, p, n);
+	reg_c := unit(reg_a, reg_b, gen, x, p);
 	
 	reg_a := QFT(reg_a);
 	reg_b := QFT(reg_b);
@@ -47,6 +63,7 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 
 	return(false);
 }
+
 
 def main(){
     print(discreteLog(13, 11, 9));

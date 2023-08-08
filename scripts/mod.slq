@@ -1,5 +1,0 @@
-// Find modulus of a over b
-def mod[n:!ℕ](a : uint[n], b : uint[n])lifted : uint[n]{
-    q := a div b;
-    return a - (q * b);
-}
