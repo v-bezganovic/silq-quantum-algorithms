@@ -45,10 +45,12 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 	// Uniform superposition prerequisite
 	r := ceil(log(n)/log(2)) coerce !ℕ;
 
+	dump();
+
 	// Initialize registers
-	reg_a := uniformSuperposition(n,r) coerce uint[n];
-	reg_b := uniformSuperposition(n,r) coerce uint[n];
-	reg_c := 0:uint[n];
+	reg_a := uniformSuperposition(n,r) coerce uint[r];
+	reg_b := uniformSuperposition(n,r) coerce uint[r];
+	reg_c := 0:uint[r];
 
 	dump();
 
@@ -67,5 +69,5 @@ def discreteLog(gen : !ℕ, p : !ℕ, x : !ℕ): !ℕ{
 
 
 def main(){
-    print(discreteLog(13, 11, 9));
+    print(discreteLog(2, 11, 9));
 }
