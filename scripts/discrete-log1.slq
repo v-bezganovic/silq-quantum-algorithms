@@ -1,0 +1,124 @@
+import bitLength;
+
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def QFT[n:!ℕ](ψ: uint[n])mfree: uint[n]{
+	for k in [0..n div 2){
+		(ψ[k],ψ[n-k-1]) := (ψ[n-k-1],ψ[k]);
+	}
+	for k in [0..n){
+		ψ[k] := H(ψ[k]);
+		for l in [k+1..n){
+			if ψ[l] && ψ[k]{
+				phase(2·π · 2^(k-l-1));
+			}
+		}
+	}
+	return ψ;
+}
+
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def estimatePhase[n:!ℕ](f:uint[n] !→lifted uint[n]):!ℕ{
+	cand := 0:uint[n];
+	for k in [0..n) { cand[k] := H(cand[k]); }
+	measure(f(cand));
+	cand := reverse(QFT[n])(cand);
+	return measure(cand) as !ℕ;
+}
+
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def to_cfrac(q:!ℚ){
+	if q=0{ return [0:!ℤ]; }
+	r:=[]:!ℤ[];
+	index:=0;
+	nq:=1/q;
+	while nq≠0{
+		nq=1/nq;
+		p:=floor(nq);
+		nq-=p;
+		r~=[p];
+	}
+	return r;
+}
+def from_cfrac(r:!ℤ[]):(!ℤ×!ℤ)⇒if r.length>1 then add((r[0],1),inv(from_cfrac(r[1..r.length]))) else (r[0],1);
+def add(x:!ℤ^2,y:!ℤ^2)⇒reduce(x[0]·y[1]+x[1]·y[0],x[1]·y[1]);
+def reduce(a:!ℤ,b:!ℤ){ d:=gcd(a,b); return (a div d,b div d); }
+def gcd(a:!ℤ,b:!ℤ):!ℤ⇒if a=0 then b else gcd(b%a,a);
+def inv(a:!ℤ,b:!ℤ)⇒(b,a);
+
+// compute a^b%N
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def powm[n:!ℕ,m:!ℕ](a:uint[n],b:uint[m],N:!ℕ)lifted: uint[n]{
+	(r,x):=(1:uint[n], a);
+	for i in 0..m{
+		if b[i]{
+			r=r·x%N;
+		}
+		x=x·x%N;
+	}
+	return r;
+}
+
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def candidates(q:!ℚ){ // // TODO: probably this can be improved
+	res:=[]:!ℤ[];
+	r:=to_cfrac(q);
+	while r.length≠0{
+		res~=[from_cfrac(r)[1]];
+		r=r[0..r.length-1];
+	}
+	return res;
+}
+
+// Source: https://github.com/eth-sri/silq/blob/master/test/shor.slq
+def order(a:!ℕ,N:!ℕ){
+	(n,m):=(0,1);
+	while m<N { n+=2, m*=2; }
+	b:=1:!ℤ;
+	while a^b%N≠1{
+		def f(b:uint[n])lifted⇒powm(a as uint[n],b,N);
+		c:=candidates(estimatePhase(f)/2^n);
+		for i in [0..c.length){
+			if a^c[i]%N=1{ b=c[i]; }
+		}
+	}
+	return b coerce !ℕ;
+}
+
+def unitary[m:!ℕ, n:!ℕ](x : uint[m], y : uint[m], const c : uint[n], a : !ℕ, b : !ℕ, N : !ℕ)lifted : uint[n]{
+    return c xorb (powab[m,n](x,y,a,b,N) coerce uint[n]);
+}
+
+def powab[m:!ℕ,n:!ℕ](const x : uint[m], const y : uint[m], a : !ℕ, b : !ℕ, N : !ℕ)lifted :uint[n]{
+    return powm(a coerce uint[n],x,N)*powm(b coerce uint[n],y,N);
+}
+
+def discreteLog(N : !ℕ, a : !ℕ, b : !ℕ) : !ℕ{
+    r := order(a, N) : !ℤ;
+    
+    m := log(r)/log(2) coerce !ℕ;
+    n := ceil(log(N)/log(2)) coerce !ℕ;
+
+    reg_a := 0 : uint[m];
+    reg_b := 0 : uint[m];
+    reg_c := 0 : uint[n];
+
+    for i_1 in [0..m){
+        reg_a[i_1] := H(reg_a[i_1]);
+        reg_b[i_1] := H(reg_b[i_1]);
+    }
+
+    obs_c := measure(reg_c);
+
+    reg_a := QFT(reg_a);
+    reg_b := QFT(reg_b);
+
+    r_1 := measure(reg_a);
+    r_2 := measure(reg_b);
+
+    if gcd(r_1 coerce !ℤ, r) == 1 { return (r_2 div r_1) % r as !ℕ; }
+    else { return false };
+}
+
+def main(){
+    print(discreteLog(2, 11, 9));
+}
