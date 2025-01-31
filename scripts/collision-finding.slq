@@ -65,10 +65,9 @@ def checkDoubles[k : !ℕ](output_list : !ℕ^k, input_list : !ℕ^k) : (!ℕ x 
 }
 
 
-// Source: https://github.com/eth-sri/silq.git
-// TODO: Fix number of grover iterations depending on oracle
-def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
-	nIterations:=floor(π/(4·asin(2^(-n/2))));
+// Modified from Source: https://github.com/eth-sri/silq.git
+def grover[n:!ℕ, arr_len : !ℕ](f: const uint[n] !→ lifted 𝔹, marks :!ℕ):!ℕ{
+	nIterations:=floor(π * sqrt(arr_len/marks)/4);
 	cand:=0:uint[n];
     for k in [0..n){ cand[k]:=H(cand[k]); }
 	for k in [0..nIterations){
@@ -87,17 +86,19 @@ def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
 	return cand;
 }
 
-def collisionDetection[arr_len : !ℕ](array : !ℕ^arr_len){
+def collisionDetection[arr_len : !ℕ](array : !ℕ^arr_len, r : !ℕ){
 	// Set cardinality of a random subset
-    k := ceil((arr_len)^(1/3)) coerce !ℕ;
 	len_bits := bitLength(arr_len);
+	// Use standard calculation of k for r-to-1 function; if r < 2, pick randomly
+    if r < 2 { k := measure(randomInt(len_bits)) as !ℕ; }
+	else { k := ceil((arr_len)^(1/3)) coerce !ℕ; }
 
 	// Generate random subset
 	subset := generateSubset[arr_len, k](array);
 
 	// Generate output list
 	(output_lists, input_lists) := generateLists(subset);
-	print(output_lists, input_lists);										// DEBUG
+	print(input_lists, output_lists);										// DEBUG
 
 	// Collision elements
 	collision1 := 0 : !ℕ;
@@ -106,19 +107,19 @@ def collisionDetection[arr_len : !ℕ](array : !ℕ^arr_len){
 	if (checkDoubles(output_lists, input_lists) == (0, 0)){			// Collision not detected upon initial observation
 		print(1);												// DEBUG
 
-		// Assign element for Grover's search from verified input_lists
-		comp_el := input_lists[0];
-
 		// Define oracle for collision detection
-    	H := λ(x : uint[len_bits]) lifted : 𝔹 {
+    	oracleH := λ(x : uint[len_bits]) lifted : 𝔹 {
 			y := op(x);
 			out := false : 𝔹;
-			for i in [0..k) { out = out | (y == output_lists[i] && x != input_lists[i] )}
+			for i in [0..k) { out = out | (y == output_lists[i] & x != input_lists[i] )}
     	    return out
     	};
 
+		if r < 2 { t := 1; }
+		else{ t := (r - 1)*k coerce !ℕ; }
+
 		// Solution detection through Grover's search 
-		pending_solution_index := grover(H) : !ℕ;
+		pending_solution_index := grover[len_bits, arr_len](oracleH, t) : !ℕ;
 
 		print(pending_solution_index);
 
@@ -145,7 +146,7 @@ def main(){
 	runs := 100;
 	score := (0,0);
 	for i in [0..runs){
-		collision := collisionDetection(ex_array);
+		collision := collisionDetection(ex_array, 0);
 		print(collision[0], collision[1]);
 		print(opClassical(collision[0]), opClassical(collision[1]));
 		if opClassical(collision[0]) == opClassical(collision[1]) & collision[0] != 0 & collision[1] != 0{ score[0] = score[0] + 1; }
