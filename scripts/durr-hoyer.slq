@@ -17,7 +17,7 @@ def groverOracle[n: !ℕ](f: const uint[n] !→lifted 𝔹, cand : uint[n])mfree
     return cand;
 }
 
-def arr_ancillary[n:!N,arr_len:!N](const idx :uint[n], array :!ℕ^arr_len)qfree{
+def makeAncillary[n:!N,arr_len:!N](const idx :uint[n], array :!ℕ^arr_len)qfree{
     anc := 2^BITMAX - 1 as uint[BITMAX];
     for i in [0..arr_len){ if idx == i { anc = array[i] coerce uint[BITMAX]; }}
     return anc
@@ -25,7 +25,7 @@ def arr_ancillary[n:!N,arr_len:!N](const idx :uint[n], array :!ℕ^arr_len)qfree
 
 // Define oracle which outputs one only if less than minimum value
 def oracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
-    return λ(const idx : uint[n]) lifted : 𝔹 { return arr_ancillary(idx, array) <= solution; }
+    return λ(const idx : uint[n]) lifted : 𝔹 { return makeAncillary(idx, array) <= solution; }
 }
 
 def prevOracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
@@ -42,7 +42,6 @@ def updateSolution[n:!ℕ,arr_len:!ℕ](qidx:uint[n], solution : !ℕ, array :!�
     return solution;
 }
 
-// TODO: Change cand to something else
 def durrhoyer[arr_len:!ℕ](array :!ℕ^arr_len){
     // Setup constants
     n := bitLength(arr_len) :!ℕ;
@@ -68,7 +67,7 @@ def durrhoyer[arr_len:!ℕ](array :!ℕ^arr_len){
         if n <= stage & stage < n + oracleIterations {
             qidx := groverOracle(f, qidx);
         }
-        // Measure cand and update oracle
+        // Measure qidx and update oracle
         if stage == n + oracleIterations{
             minima = updateSolution[n,arr_len](qidx, minima, array);
             f = oracle[n,arr_len](minima, array);

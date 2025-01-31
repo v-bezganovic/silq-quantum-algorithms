@@ -1,13 +1,13 @@
 import random;
 
 // Initialize an array of elements (hardcoded)
-    array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
+ex_array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
 
 // Current algorithm's limit - array length of 30
 arr_length := 30 : !ℕ;
 ar_length_bits := 5 : !ℕ;
 
-def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
+def generateSubset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 	subset := vector(k, 0:!ℕ);
 
 	for i in [0..k){
@@ -20,7 +20,7 @@ def generate_Subset(k : !ℕ, arr : !ℕ[]) : !ℕ[]{
 } 
 
 
-def generate_Lists(k : !ℕ, subset : !ℕ[]) : (!ℕ[] x !ℕ[]){
+def generateLists(k : !ℕ, subset : !ℕ[]) : (!ℕ[] x !ℕ[]){
 	output_list := vector(k, 0:!ℕ);
 	input_list := vector(k, 0:!ℕ);
 	
@@ -33,7 +33,7 @@ def generate_Lists(k : !ℕ, subset : !ℕ[]) : (!ℕ[] x !ℕ[]){
 }
 
 
-def check_Doubles(k : !ℕ, output_list : !ℕ[], input_list : !ℕ[]) : (!ℕ x !ℕ){
+def checkDoubles(k : !ℕ, output_list : !ℕ[], input_list : !ℕ[]) : (!ℕ x !ℕ){
 	grovers_item := 0 : !ℕ;
 	for i in [0..k){
 		for j in [i+1..k){
@@ -68,26 +68,26 @@ def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
 }
 
 
-def collisionDetection(set : !ℕ[]){
+def collisionDetection(array : !ℕ[]){
 	// Set cardinality of a random subset
     k := 5 : !ℕ;
 
 	// Generate random subset
-	subset := generate_Subset(k, array) as !ℕ[];
+	subset := generateSubset(k, array) as !ℕ[];
 
 	// Generate output list
-	(outputs, inputs) := generate_Lists(k, subset);
-	print(outputs, inputs);										// DEBUG
+	(output_lists, input_lists) := generateLists(k, subset);
+	print(output_lists, input_lists);										// DEBUG
 
 	// Collision elements
 	collision1 := 0 : !ℕ;
 	collision2 := 0 : !ℕ;
 
-	if (check_Doubles(k, outputs, inputs) == (0, 0)){			// Collision not detected upon initial observation
+	if (checkDoubles(k, output_lists, input_lists) == (0, 0)){			// Collision not detected upon initial observation
 		print(1);												// DEBUG
 
-		// Assign element for Grover's search from verified inputs
-		comp_el := inputs[0];
+		// Assign element for Grover's search from verified input_lists
+		comp_el := input_lists[0];
 
 		// Define oracle for collision detection
     	f := λ(x : uint[ar_length_bits]) lifted : 𝔹 { 
@@ -95,28 +95,29 @@ def collisionDetection(set : !ℕ[]){
     	};
 
 		// Solution detection through Grover's search 
-			pending_solution_index := grover(f) : !ℕ;
+		pending_solution_index := grover(f) : !ℕ;
 
-			print(pending_solution_index);
+		print(pending_solution_index);
 
-			if pending_solution_index < 30 {
-				for i in [0..k){
-					if array[pending_solution_index] % 7 == inputs[i] % 7 && array[pending_solution_index] != inputs[i] {
-						collision1 = array[pending_solution_index];
-						collision2 = inputs[i];
-					} 
-				}
+		if pending_solution_index < 30 {
+			for i in [0..k){
+				if array[pending_solution_index] % 7 == input_lists[i] % 7 && array[pending_solution_index] != input_lists[i] {
+					collision1 = array[pending_solution_index];
+					collision2 = input_lists[i];
+				} 
 			}
-		
-
+		}
 	}
-
-	else {(collision1,collision2) = check_Doubles(k, outputs, inputs);}
+	else {
+		double := checkDoubles(k, output_lists, input_lists);
+		collision1 = double[0];
+		collision2 = double[1];
+	}
 
 	return (collision1, collision2);
 }
 
 
 def main(){
-	print(collisionDetection(array));
+	print(collisionDetection(ex_array));
 }
