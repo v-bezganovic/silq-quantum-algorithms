@@ -1,8 +1,6 @@
-import random;
+import random, bitLength;
 
-// Current algorithm's limit - array length of 30
-arr_length := 30 : !ℕ;
-ar_length_bits := 5 : !ℕ;
+BITMAX := 32;
 
 // Source: https://github.com/eth-sri/silq.git
 def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
@@ -12,52 +10,99 @@ def groverDiffusion[n:!ℕ](cand:uint[n])mfree: uint[n]{
 	return cand;
 }
 
-// Source: https://github.com/eth-sri/silq.git
-def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
-	nIterations:=floor(π/(4·asin(2^(-n/2))));
-	cand:=0:uint[n];
-    for k in [0..n){ cand[k]:=H(cand[k]); }
-	for k in [0..nIterations){
-		if f(cand){ phase(π); }
-		cand:=groverDiffusion(cand);
-	}
-	return measure(cand) as !ℕ;
+// Perform the oracle step of Grover's
+def groverOracle[n: !ℕ](f: const uint[n] !→lifted 𝔹, cand : uint[n])mfree: uint[n]{
+    if f(cand){ phase(π); }
+    cand:=groverDiffusion(cand);
+    return cand;
 }
 
+def arr_ancillary[n:!N,arr_len:!N](const idx :uint[n], array :!ℕ^arr_len)qfree{
+    anc := 2^BITMAX - 1 as uint[BITMAX];
+    for i in [0..arr_len){ if idx == i { anc = array[i] coerce uint[BITMAX]; }}
+    return anc
+}
+
+// Define oracle which outputs one only if less than minimum value
+def oracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
+    return λ(const idx : uint[n]) lifted : 𝔹 { return arr_ancillary(idx, array) <= solution; }
+}
+
+def prevOracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
+    return λ(const idx : uint[n]) lifted : 𝔹 { return idx <= solution; }
+}
+
+def updateSolution[n:!ℕ,arr_len:!ℕ](qidx:uint[n], solution : !ℕ, array :!ℕ[]){
+    temp_solution_index := measure(qidx) as !ℕ;
+    if (temp_solution_index < arr_len){
+        if (array[temp_solution_index] < solution){
+            return array[temp_solution_index];
+        }
+    }
+    return solution;
+}
+
+// TODO: Change cand to something else
+def durrhoyer[arr_len:!ℕ](array :!ℕ^arr_len){
+    // Setup constants
+    n := bitLength(arr_len) :!ℕ;
+    oracleIterations := floor(π/(4·asin(2^(-n/2))));
+
+    // Generate random index 0 <= y <= arr_len-1
+    index := randomInt(n) as uint[n];
+    index := measure(index);
+    minima := array[index] : !ℕ;
+    f := oracle[n,arr_len](minima,array);
+
+    // Setup quantum register
+    qidx := 0 as uint[n];
+    // Iteration index and counter for Grover's loop
+    t := 0 : !ℤ;
+    stage := 0 : !ℤ;
+    while (t <= (22.5*sqrt(arr_len) + 1.4*(n^2))){
+        // Prepare superposition for all n qubits
+        if stage < n {
+            qidx[stage] := H(qidx[stage]);
+        }
+        // Perform Grover's for oracleIterations
+        if n <= stage & stage < n + oracleIterations {
+            qidx := groverOracle(f, qidx);
+        }
+        // Measure cand and update oracle
+        if stage == n + oracleIterations{
+            minima = updateSolution[n,arr_len](qidx, minima, array);
+            f = oracle[n,arr_len](minima, array);
+            qidx := 0 :uint[n];
+        }
+        // Update stage and time (last stage costs no time)
+        if stage < n + oracleIterations{
+            t = t+1;
+            stage = stage+1;
+        }
+        else { stage = 0; }
+    }
+    measure(qidx);
+    return minima;
+}
 
 def main(){
     // Initialize an array of elements (hardcoded)
-    array := [14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8] as !ℕ[];
-    
-    // Generate random index 0 <= y <= N-1
-    index := randomInt(ar_length_bits) as uint[ar_length_bits];
-    index := measure(index);
+    arr_len := 30 : !ℕ;
+    // array := (14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8) coerce !ℕ^arr_len;
+    array := (14, 15, 8, 3, 25, 57, 4, 6, 12, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 2, 100, 49, 34, 300, 900, 78, 43, 32, 60) coerce !ℕ^arr_len;
 
-    solution := array[index] : !ℕ;
+    // arr_len := 5 :!ℕ;
+    // array := (10, 30, 2, 25, 45) coerce !ℕ^arr_len;
 
-    // Define oracle which outputs one only if less than minimum value
-    f := λ(x : uint[5]) lifted : 𝔹 { 
-        return x <= solution;
-    };
-
-    // Iteration index and counter for Grover's loop
-    t := 0 : !ℤ;
-
-    // Grover's loop
-    while (t <= (22.5*sqrt(arr_length) + 1.4*(log(arr_length)/log(2))^2)){
-
-        temp_solution_index := grover(f) : !ℕ;
-
-        if (temp_solution_index < arr_length){
-            
-            if (array[temp_solution_index] < solution){
-                solution = array[temp_solution_index];
-            }
-
-        }
-        
-        t = t+1;
+    minima := 2;
+    runs := 100;
+    score := (0,0);
+    for k in [0..runs) { 
+        print((k+1)/runs);
+        solution := durrhoyer[arr_len](array);
+        print(solution);
+        if solution == minima { score[0] += 1; }
+        else {score[1] += 1; }
     }
-
-    print(solution);
+    return score;
 }
