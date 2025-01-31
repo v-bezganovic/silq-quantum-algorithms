@@ -10,7 +10,7 @@ ex_array := [14, 15, 11, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 1, 13,
 // arr_length := 4;
 // ex_array := [1, 3, 6, 8] coerce !ℕ^arr_length;
 
-// Comparison operation to perform
+// Input: r-to-1 function
 def op[n:!ℕ](const x : uint[n])lifted:uint[n]{
 	return x % 7
 	// return x % 13
@@ -66,6 +66,7 @@ def checkDoubles[k : !ℕ](output_list : !ℕ^k, input_list : !ℕ^k) : (!ℕ x 
 
 
 // Source: https://github.com/eth-sri/silq.git
+// TODO: Fix number of grover iterations depending on oracle
 def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹):!ℕ{
 	nIterations:=floor(π/(4·asin(2^(-n/2))));
 	cand:=0:uint[n];
@@ -109,12 +110,15 @@ def collisionDetection[arr_len : !ℕ](array : !ℕ^arr_len){
 		comp_el := input_lists[0];
 
 		// Define oracle for collision detection
-    	f := λ(x : uint[len_bits]) lifted : 𝔹 { 
-    	    return op(x) == op(comp_el as uint[len_bits]) && x != comp_el;
+    	H := λ(x : uint[len_bits]) lifted : 𝔹 {
+			y := op(x);
+			out := false : 𝔹;
+			for i in [0..k) { out = out | (y == output_lists[i] && x != input_lists[i] )}
+    	    return out
     	};
 
 		// Solution detection through Grover's search 
-		pending_solution_index := grover(f) : !ℕ;
+		pending_solution_index := grover(H) : !ℕ;
 
 		print(pending_solution_index);
 
