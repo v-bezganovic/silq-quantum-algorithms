@@ -87,18 +87,18 @@ def durrhoyer[arr_len:!ℕ](array :!ℕ^arr_len){
 def main(){
     // Initialize an array of elements (hardcoded)
     arr_len := 30 : !ℕ;
-    // array := (14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8) coerce !ℕ^arr_len;
-    array := (14, 15, 8, 3, 25, 57, 4, 6, 12, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 2, 100, 49, 34, 300, 900, 78, 43, 32, 60) coerce !ℕ^arr_len;
+    // ex_array := (14, 15, 8, 3, 25, 57, 4, 6, 2, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 89, 100, 49, 34, 300, 900, 78, 43, 32, 8) coerce !ℕ^arr_len;
+    ex_array := (14, 15, 8, 3, 25, 57, 4, 6, 12, 67, 87, 5, 7, 46, 9, 20, 18, 7, 5, 56, 2, 100, 49, 34, 300, 900, 78, 43, 32, 60) coerce !ℕ^arr_len;
 
     // arr_len := 5 :!ℕ;
-    // array := (10, 30, 2, 25, 45) coerce !ℕ^arr_len;
+    // ex_array := (10, 30, 2, 25, 45) coerce !ℕ^arr_len;
 
     minima := 2;
-    runs := 100;
+    runs := 10;
     score := (0,0);
     for k in [0..runs) { 
         print((k+1)/runs);
-        solution := durrhoyer[arr_len](array);
+        solution := durrhoyer(ex_array);
         print(solution);
         if solution == minima { score[0] += 1; }
         else {score[1] += 1; }
