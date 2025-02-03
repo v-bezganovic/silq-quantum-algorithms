@@ -80,7 +80,7 @@ def durrhoyer[arr_len:!ℕ](array :!ℕ^arr_len){
         }
         else { stage = 0; }
     }
-    measure(qidx);
+    minima = updateSolution[n,arr_len](qidx, minima, array);
     return minima;
 }
 
