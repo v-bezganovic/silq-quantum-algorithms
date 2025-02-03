@@ -95,7 +95,7 @@ def main(){
     m := 4;
     n := ceil(log(m)/log(2)) coerce !ℕ;
 
-    qubits := uniformSuperposition(m, n); 
+    qubits := uniformSuperposition(m, n) as uint[n]; 
     dump();
     measure(qubits);
 }
