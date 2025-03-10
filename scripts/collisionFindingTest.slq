@@ -26,7 +26,7 @@ def main(){
 	opClassical := generateClassical(op[BITMAX]);
 	for i in [0..runs){
 		print(0,0,i,0,0);
-		collision := collisionDetection(ex_array, r, op[BITMAX]);
+		collision := collisionDetection(ex_array, op[BITMAX], r);
 		print(collision[0], collision[1]);
 		print(opClassical(collision[0]), opClassical(collision[1]));
 		if opClassical(collision[0]) == opClassical(collision[1]) & (collision[0] != 0 | collision[1] != 0){ score[0] = score[0] + 1; }
