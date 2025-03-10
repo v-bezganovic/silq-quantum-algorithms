@@ -32,7 +32,6 @@ def generateLists[k : !ℕ](subset : !ℕ^k, cF : !ℕ !-> !ℕ) : (!ℕ^k x !�
 }
 
 def checkDoubles[k : !ℕ](output_list : !ℕ^k, input_list : !ℕ^k) : (!ℕ x !ℕ){
-	grovers_item := 0 : !ℕ;
 	for i in [0..k){
 		for j in [i+1..k){
 			if output_list[j] == output_list[i] && input_list[j] != input_list[i]{
