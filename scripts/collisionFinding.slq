@@ -47,8 +47,8 @@ def generateClassical[bitmax : !ℕ](f : const uint[bitmax] !->lifted uint[bitma
 }
 
 // Modified from Source: https://github.com/eth-sri/silq.git
-def grover[n:!ℕ, arr_len : !ℕ](f: const uint[n] !→ lifted 𝔹, marks :!ℕ):!ℕ{
-	nIterations:=floor(π * sqrt(arr_len/marks)/4);
+def grover[n:!ℕ](f: const uint[n] !→ lifted 𝔹, marks :!ℕ):!ℕ{
+	nIterations:=floor(π * sqrt((2^n) / marks)/4);
 	cand:=0:uint[n];
     for k in [0..n){ cand[k]:=H(cand[k]); }
 	for k in [0..nIterations){
@@ -105,7 +105,7 @@ def collisionDetection[arr_len : !ℕ, bitmax :!ℕ](array : !ℕ^arr_len, F : c
 		else{ t := (r - 1)*k coerce !ℕ; }
 
 		// Solution detection through Grover's search 
-		pending_solution_index := grover[len_bits, arr_len](oracleH, t) : !ℕ;
+		pending_solution_index := grover(oracleH, t) : !ℕ;
 
 		if pending_solution_index < arr_len {
 			print(pending_solution_index);
