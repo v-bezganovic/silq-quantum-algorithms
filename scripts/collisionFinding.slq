@@ -97,7 +97,7 @@ def collisionDetection[arr_len : !ℕ, bitmax :!ℕ](array : !ℕ^arr_len, F : c
 			for i in [0..arr_len){ if idx == i { anc = array[i] coerce uint[bitmax]; }}
 			anc = F(anc);
 			out := false : 𝔹;
-			for i in [0..k) { if idx == i {out = out | (anc == output_lists[i] & array[i] != input_lists[i] )}}
+			for i in [0..k) { if idx == i {out = out || (anc == output_lists[i] & array[i] != input_lists[i] )}}
     	    return out
     	};
 
