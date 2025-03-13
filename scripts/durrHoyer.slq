@@ -28,10 +28,6 @@ def oracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
     return λ(const idx : uint[n]) lifted : 𝔹 { return makeAncillary(idx, array) <= solution; }
 }
 
-def prevOracle[n:!ℕ, arr_len:!ℕ](solution : !ℕ, array :!ℕ^arr_len){
-    return λ(const idx : uint[n]) lifted : 𝔹 { return idx <= solution; }
-}
-
 def updateSolution[n:!ℕ,arr_len:!ℕ](qidx:uint[n], solution : !ℕ, array :!ℕ[]){
     temp_solution_index := measure(qidx) as !ℕ;
     if (temp_solution_index < arr_len){
