@@ -93,7 +93,7 @@ def main(){
     runs := 10;
     score := (0,0);
     for k in [0..runs) { 
-        print((k+1)/runs);
+        print(((k+1),runs));
         solution := durrhoyer(ex_array);
         print(solution);
         if solution == minima { score[0] += 1; }
